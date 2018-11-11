@@ -4,12 +4,12 @@ using JuliaRL
 using JuliaRL.Environments
 using Random
 
-function mountain_car_test()
+function mountain_car_test(α=0.5/8, ϵ=0.1, tilings=8, tiles=4)
 
     ϵ = 0.1
     α = 0.5/8
-    weights = zeros(256*3)
-    iht = TileCoder.IHT(128)
+    weights = zeros((8*(tiles+1)^2)*3)
+    iht = TileCoder.IHT(8*(tiles+1)^2)
 
     Q(ϕ, action) = sum(weights[ϕ .+ (128*action + 1)])
     # loss(ϕ, target) = (target - Q(ϕ)).^2
@@ -33,7 +33,7 @@ function mountain_car_test()
             end
             # println(action)
             state, reward, terminal = env_ns.step!(state, action)
-            ϕ_prime = TileCoder.tiles!(iht, 8, env_ns.normalized_features(state).*4)
+            ϕ_prime = TileCoder.tiles!(iht, tilings, env_ns.normalized_features(state).*tiles)
             target = watkins_q_target(ϕ_prime, reward)
             # println(target - predict(ϕ, action))
             weights[ϕ .+ (128*action + 1)] .+= α*(target - Q(ϕ, action))
