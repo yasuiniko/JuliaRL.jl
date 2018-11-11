@@ -1,0 +1,10 @@
+name = "JuliaRL"
+uuid = "10ec99bc-e54b-11e8-04da-8598ad081a85"
+authors = ["Matt <mkschleg@umail.iu.edu>"]
+version = "0.1.0"
+
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
