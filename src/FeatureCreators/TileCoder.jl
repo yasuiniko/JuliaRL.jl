@@ -1,6 +1,5 @@
 module TileCoder
 
-
 mutable struct IHT
     size
     overfullCount

@@ -6,7 +6,7 @@ using JuliaRL
 using JuliaRL.Environments
 using Random
 using LinearAlgebra
-
+using ProgressMeter
 
 function test_flux()
 
@@ -28,19 +28,15 @@ function test_flux()
     train_X = rand(5, 100)
     train_Y = get_opt(train_X)
 
-
     evalcb() = @show(loss(train_X, train_Y))
 
     @epochs 10 Flux.train!(loss, data, ADAM([W, b], 0.001), cb = Flux.throttle(evalcb, 5))
-
-    # println(size(get_opt(X)))
-
 
 end
 
 
 
-function mountain_car_test_flux(α=0.5/8, ϵ=0.1, tilings=8, tiles=4)
+function mountain_car_test_flux(α=0.5/8, ϵ=0.1, tilings=32, tiles=2)
 
     ## Inefficient version of tilecoded q-learning
 
@@ -64,8 +60,8 @@ function mountain_car_test_flux(α=0.5/8, ϵ=0.1, tilings=8, tiles=4)
 
     optimizer = SGD([weights], α)
     env_ns = MountainCar
-
-    for episode = 1:500
+    cumulative_reward_array = zeros(Int64, 1000)
+    @showprogress 0.1 "Episode: " for episode = 1:1000
         terminal = false
         num_steps = 0
         cumulative_reward = 0
@@ -94,7 +90,8 @@ function mountain_car_test_flux(α=0.5/8, ϵ=0.1, tilings=8, tiles=4)
 
             t = copy(t_prime)
         end
-        println("Episode: $episode, Steps: $num_steps, Reward: $cumulative_reward")
+        cumulative_reward_array[episode] = cumulative_reward
+        # println("Episode: $episode, Steps: $num_steps, Reward: $cumulative_reward")
     end
-
+    return cumulative_reward_array
 end
