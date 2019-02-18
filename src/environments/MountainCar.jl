@@ -20,25 +20,25 @@ mutable struct MountainCar <: AbstractEnvironment
                                         0)
 end
 
-function start!(env::MountainCar; rng = Random.GLOBAL_RNG)
+function start!(env::MountainCar; rng = Random.GLOBAL_RNG, kwargs...)
     env.pos = (rand(rng)*(MountainCarConst.pos_initial_range[2]
                           - MountainCarConst.pos_initial_range[1])
                + MountainCarConst.pos_initial_range[1])
     env.vel = 0
 end
 
-function start(env::MountainCar; rng = Random.GLOBAL_RNG)
-    return MountainCar(rng)
+function start(env::MountainCar; rng = Random.GLOBAL_RNG, kwargs...)
+    return typeof(env)(rng)
 end
 
-function step!(env::MountainCar, action; kwargs...) # -> agent_state, reward, terminal
+function step!(env::MountainCar, action::Int64; rng = Random.GLOBAL_RNG, kwargs...) # -> agent_state, reward, terminal
     # println(clamp(agent_state.vel + action*0.001 - 0.0025*cos(3*agent_state.pos), vel_limit...))
     env.vel = clamp(env.vel + (action - 1)*0.001 - 0.0025*cos(3*env.pos), MountainCarConst.vel_limit...)
     env.pos = clamp(env.pos + env.vel, MountainCarConst.pos_limit...)
     return env, get_reward(env), is_terminal(env)
 end
 
-function step(env::MountainCar, action; kwargs...)
+function step(env::MountainCar, action::Int64; rng = Random.GLOBAL_RNG, kwargs...)
     new_env = copy(env)
     return step!(new_env, action; kwargs...)
 end

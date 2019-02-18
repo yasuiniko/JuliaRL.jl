@@ -3,7 +3,11 @@ using Flux.Tracker
 using Flux: @epochs
 
 using JuliaRL
-using JuliaRL.Environments
+
+import JuliaRL.start!, JuliaRL.step!
+
+TileCoder = JuliaRL.FeatureCreators.TileCoder
+# using JuliaRL.Environments
 using Random
 using LinearAlgebra
 using ProgressMeter
@@ -58,32 +62,34 @@ function mountain_car_test_flux(α=0.5/8, ϵ=0.1, tilings=32, tiles=2)
     get_action(t) = findmax([Q(make_feats(t, a)) for a = 0:2])[2] - 1
     loss(ϕ, y) = Flux.mse(Q(ϕ), y)
 
-    optimizer = SGD([weights], α)
-    env_ns = MountainCar
+    optimizer = Descent(α)
+    env = MountainCar(Random.GLOBAL_RNG)
+    # env_ns = MountainCar
     cumulative_reward_array = zeros(Int64, 1000)
     @showprogress 0.1 "Episode: " for episode = 1:1000
         terminal = false
         num_steps = 0
         cumulative_reward = 0
-        state = env_ns.start()
+        start!(env)
         action = 0
 
-        t = TileCoder.tiles!(iht, 8, env_ns.normalized_features(state).*4)
-
+        t = TileCoder.tiles!(iht, 8, normalized_state(env).*4)
+        # println(weights)
         while !terminal
 
             action = get_action(t)
+            # println(action)
             ϕ = make_feats(t, action)
-
+            # println([Q(make_feats(t, a)).data for a = 0:2])
             if rand() < ϵ
                 action = rand(0:2)
             end
 
-            state, reward, terminal = env_ns.step!(state, action)
-            t_prime = TileCoder.tiles!(iht, tilings, env_ns.normalized_features(state).*tiles)
+            state, reward, terminal = step!(env, action)
+            t_prime = TileCoder.tiles!(iht, tilings, normalized_state(env).*tiles)
             target = watkins_q_target(t_prime, reward).data
 
-            Flux.train!(loss, [(ϕ, target)], optimizer)
+            Flux.train!(loss, [weights], [(ϕ, target)], optimizer)
 
             num_steps += 1
             cumulative_reward += reward

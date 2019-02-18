@@ -235,7 +235,7 @@ update!(value::AbstractQFunction, ϕ, action, δ) = throw("Define Update Functio
 update!(value::QFunction, ϕ, action, δ) = value.weights[(value.num_features_per_action*(action-2) + 1):(value.num_features_per_action*(action-1) + 1)] .+= δ*ϕ
 update!(value::SparseQFunction, ϕ, action, δ) = value.weights[ϕ .+ (value.num_features_per_action*(action-1) + 1)] .+= δ
 
-mutable struct WatkinsQ
+mutable struct WatkinsQ <: Optimizer
     α::Float64
 end
 watkins_q_target(q::AbstractQFunction, ϕ, r) = r + maximum([q(ϕ, a) for a = 1:q.num_actions])
