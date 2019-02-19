@@ -233,7 +233,13 @@ get_values(value::AbstractQFunction, ϕ) = [value(ϕ, a) for a in 1:value.num_ac
 
 update!(value::AbstractQFunction, ϕ, action, δ) = throw("Define Update Function for Q Function")
 update!(value::QFunction, ϕ, action, δ) = value.weights[(value.num_features_per_action*(action-2) + 1):(value.num_features_per_action*(action-1) + 1)] .+= δ*ϕ
-update!(value::SparseQFunction, ϕ, action, δ) = value.weights[ϕ .+ (value.num_features_per_action*(action-1) + 1)] .+= δ
+function update!(value::SparseQFunction, ϕ, action, δ)
+    # println((value.num_features_per_action*(action-1) + 1))
+    value.weights[ϕ .+ (value.num_features_per_action*(action-1) + 1)] .+= δ
+    # println(sum(value.weights))
+    # println(value.weights[ϕ .+ (value.num_features_per_action*(action-1) + 1)])
+    # println(value.weights)
+end
 
 mutable struct WatkinsQ <: Optimizer
     α::Float64
@@ -244,6 +250,7 @@ function update!(value::AbstractQFunction, opt::WatkinsQ, ϕ_t, ϕ_tp1, r, γ, �
     α = opt.α
     δ = watkins_q_target(value, ϕ_tp1, r) - value(ϕ_t, a_t)
     Δθ = α*δ
+    # println(Δθ)
     update!(value, ϕ_t, a_t, Δθ)
 end
 

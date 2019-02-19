@@ -3,31 +3,48 @@ module JuliaRL
 greet() = print("Hello Reinforcement Learning Julia!")
 
 export FeatureCreators
-
 include("FeatureCreators.jl")
 
 export LinearRL, TabularRL
 include("LinearRL.jl")
 include("TabularRL.jl")
 
-export AbstractEnvironment, start, step!, step, get_reward, is_terminal, Environments, normalized_state
+
+export ExperienceReplay, WeightedExperienceReplay, size, getindex, add!
+
+include("Replay.jl")
+
+
+export AbstractEnvironment, start, start!, step!, step, get_reward, get_state, is_terminal, get_actions, render
 
 abstract type AbstractEnvironment end
 
 function start(env::AbstractEnvironment; rng=Random.GLOBAL_RNG, kwargs...)
-    throw("Implement Start for environment $(typeof(env))")
+    new_env = copy(env)
+    return start!(new_env; rng=rng, kwargs...)
 end
 
 function start!(env::AbstractEnvironment; rng=Random.GLOBAL_RNG, kwargs...)
-    throw("Implement Start for environment $(typeof(env))")
-end
-
-function step!(env::AbstractEnvironment, action; rng = Random.GLOBAL_RNG, kwargs...) # -> agent_state, reward, terminal
-    throw("Implement Step! for environment $(typeof(env))")
+    reset!(env; rng=rng, kwargs...)
+    return env, get_state(env)
 end
 
 function step(env::AbstractEnvironment, action; rng = Random.GLOBAL_RNG, kwargs...)
-    throw("Implement Step for environment $(typeof(env))")
+    new_env = copy(env)
+    return step!(new_env, action; kwargs...)
+end
+
+function step!(env::AbstractEnvironment, action; rng = Random.GLOBAL_RNG, kwargs...) # -> env, state, reward, terminal
+    environment_step!(env, action; rng=rng, kwargs...)
+    return env, get_state(env), get_reward(env), is_terminal(env)
+end
+
+function reset!(env::AbstractEnvironment; rng = Random.GLOBAL_RNG, kwargs...)
+    throw("Implement reset! for environment $(typeof(env))")
+end
+
+function environment_step!(env::AbstractEnvironment, action; rng=Random.GLOBAL_RNG, kwargs...)
+    throw("Implement environment_step for environment $(typeof(env))")
 end
 
 function get_reward(env::AbstractEnvironment) # -> determines if the agent_state is terminal
@@ -38,8 +55,20 @@ function is_terminal(env::AbstractEnvironment) # -> determines if the agent_stat
     throw("Implement is_terminal for environment $(typeof(env))")
 end
 
-function normalized_state(env::AbstractEnvironment) # -> determines if the agent_state is terminal
+function get_state(env::AbstractEnvironment) # -> determines if the agent_state is terminal
     throw("Implement normalized_state for environment $(typeof(env))")
+end
+
+function get_actions(env::AbstractEnvironment)
+    return Set()
+end
+
+function Base.show(io::IO, env::AbstractEnvironment)
+  println("Implement Base.show for environment $(typeof(env))")
+end
+
+function render(env::AbstractEnvironment, args...; kwargs...)
+    println("Render not implemented for environment $(typeof(env))")
 end
 
 include("Environments.jl")
@@ -51,7 +80,6 @@ abstract type AbstractState end
 export AbstractPolicy
 
 abstract type AbstractPolicy end
-
 
 export AbstractAgent
 

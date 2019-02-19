@@ -5,8 +5,6 @@ include("SumTree.jl")
 import Random
 import Base.getindex, Base.size
 
-export ExperienceReplay, WeightedExperienceReplay
-
 mutable struct ExperienceReplay
     buffer::CircularBuffer
     ExperienceReplay(size, types; column_names=nothing)= new(
