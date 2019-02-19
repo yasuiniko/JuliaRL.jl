@@ -8,8 +8,6 @@ const IN_SLURM = "SLURM_JOBID" in keys(ENV)
 IN_SLURM && using ClusterManagers
 
 
-# @everywhere using JuliaRL
-
 ARGS_KWARGS = [
     Dict(:ARGS=>(0.5/8, 0.1, 1.0, 32, 8), :KWARGS=>Dict([:n_episodes=>1000])),
     Dict(:ARGS=>(0.5/4, 0.1, 1.0, 32, 4), :KWARGS=>Dict([:n_episodes=>1000])),

@@ -13,6 +13,8 @@ mutable struct GymEnv <: AbstractEnvironment
     function GymEnv(name::Symbol, version::Symbol; rng=nothing, seed=0)
         new_gym = new(OpenAIGym.GymEnv(name, version), 0.0, seed)
         finalizer(close, new_gym)
+        println(new_gym.gymEnv.pyenv[:seed](PyObject(seed)))
+        # pycall(new_gym.gymEnv.pyenv[:seed], PyObject(seed))
         return new_gym
     end
 end
