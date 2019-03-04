@@ -1,9 +1,11 @@
 using Random
 using PyCall
-import OpenAIGym
+# import OpenAIGym
 
 export render, close
 import Base.close
+
+include("utilities/OpenAIGym.jl")
 
 mutable struct GymEnv <: AbstractEnvironment
     gymEnv::OpenAIGym.AbstractGymEnv
