@@ -56,7 +56,7 @@ function is_terminal(env::AbstractEnvironment) # -> determines if the agent_stat
 end
 
 function get_state(env::AbstractEnvironment) # -> determines if the agent_state is terminal
-    throw("Implement normalized_state for environment $(typeof(env))")
+    throw("Implement get_state for environment $(typeof(env))")
 end
 
 function get_actions(env::AbstractEnvironment)
@@ -64,7 +64,7 @@ function get_actions(env::AbstractEnvironment)
 end
 
 function Base.show(io::IO, env::AbstractEnvironment)
-  println("Implement Base.show for environment $(typeof(env))")
+    println("Implement Base.show for environment $(typeof(``env))")
 end
 
 function render(env::AbstractEnvironment, args...; kwargs...)
@@ -92,8 +92,5 @@ end
 function step!(agent::AbstractAgent, env_s_tp1, r, terminal; rng=Random.GLOBAL_RNG, kwargs...)
     throw("Implement step! function for agent $(typeof(agent))")
 end
-
-
-# include("Replay.jl")
 
 end # module

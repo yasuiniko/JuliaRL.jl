@@ -5,7 +5,6 @@ using JuliaRL
 using Random
 import LearnBase.IntervalSet
 
-
 # rand(rng, int_set::)
 Base.rand(rng::AbstractRNG, s::IntervalSet{T}) where T <: AbstractVector = Float64[rand(rng) * (s.hi[i] - s.lo[i]) + s.lo[i] for i=1:length(s)]
 

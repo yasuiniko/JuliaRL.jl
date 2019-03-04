@@ -107,7 +107,6 @@ function step!(agent::TileCoderAgent, env_s_tp1, r, terminal; rng=Random.GLOBAL_
 
 end
 
-
 function run(α=0.5/8, ϵ=0.1, γ=1.0, tilings=32, tiles=2; n_episodes=1000, seed=1002349)
 
     ϵ = 0.1
@@ -125,29 +124,23 @@ function run(α=0.5/8, ϵ=0.1, γ=1.0, tilings=32, tiles=2; n_episodes=1000, see
     cumulative_reward_array = zeros(Int64, n_episodes)
     # @showprogress 0.1 "Episode: " for episode = 1:n_episodes
     for episode = 1:n_episodes
-        # println(episode)
+
         terminal = false
         num_steps = 0
         cumulative_reward = 0
         _, state = start!(env; rng=rng)
-        # env = MountainCar(rng)
-        # state = normalized_state(env)
         action = start!(agent, state)
         while !terminal
 
             _, state_prime, reward, terminal = step!(env, action-1)
 
-            # state_prime = normalized_state(env)
-
             action = step!(agent, state_prime, reward, terminal)
-            # println(action)
 
             num_steps += 1
             cumulative_reward += reward
 
         end
         cumulative_reward_array[episode] = cumulative_reward
-        # println("Episode: $episode, Steps: $num_steps, Reward: $cumulative_reward")
     end
     return cumulative_reward_array
 end

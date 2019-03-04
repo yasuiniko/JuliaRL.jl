@@ -17,6 +17,10 @@ function reset!(env::ExampleEnvironment; rng = Random.GLOBAL_RNG, kwargs...)
     env.state = rand(rng, ExampleEnvConst.state_initial_range)
 end
 
+function get_actions(env::AbstractEnvironment)
+    return Set()
+end
+
 function environment_step!(env::ExampleEnvironment, action::Int64; rng = Random.GLOBAL_RNG, kwargs...)
     env.state = rand(rng, ExampleEnvConst.state_initial_range)
     env.some_variable = env.state + randn(rng)

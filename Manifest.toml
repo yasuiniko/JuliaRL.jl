@@ -489,7 +489,7 @@ version = "0.10.0"
 
 [[OpenAIGym]]
 deps = ["PyCall", "Reexport", "Reinforce"]
-git-tree-sha1 = "2029b7d7c7b804eeee6ae97f421fdda8ecf66e30"
+git-tree-sha1 = "f4adecd6a81c7544e4d9b918d47718cf8bbd9019"
 repo-rev = "master"
 repo-url = "https://github.com/JuliaML/OpenAIGym.jl.git"
 uuid = "41d6fcb8-dd24-11e8-2536-c3dc023218b5"
