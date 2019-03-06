@@ -43,9 +43,14 @@ use_pyarray_state(envname::Symbol) = !(envname ∈ (:Blackjack,))
 
 function GymEnv(name::Symbol, ver::Symbol = :v0;
                 stateT = ifelse(use_pyarray_state(name), PyArray, PyAny))
+    #TODO: This is a hack. Should be fixed (i.e. local only python env...)!
+
+    copy!(pygym, pyimport("gym"))
+
     if PyCall.ispynull(pysoccer) && name ∈ (:Soccer, :SoccerEmptyGoal)
         copy!(pysoccer, pyimport("gym_soccer"))
     end
+
 
     GymEnv(name, ver, pygym[:make]("$name-$ver"), stateT)
 end
@@ -172,9 +177,13 @@ Reinforce.finished(env::GymEnv, s′) = env.done
 const pygym    = PyNULL()
 const pysoccer = PyNULL()
 
-function __init__()
-    # the copy! puts the gym module into `pygym`, handling python ref-counting
-    copy!(pygym, pyimport("gym"))
-end
+# function __init__()
+#     # the copy! puts the gym module into `pygym`, handling python ref-counting
+#     try
+#         copy!(pygym, pyimport("gym"))
+#     catch
+#         pyimport_conda("gym", PKG)
+#     end
+# end
 
 end # module

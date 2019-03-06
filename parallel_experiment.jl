@@ -9,9 +9,9 @@ IN_SLURM && using ClusterManagers
 
 
 ARGS_KWARGS = [
-    Dict(:ARGS=>(0.5/8, 0.1, 1.0, 32, 8), :KWARGS=>Dict([:n_episodes=>1000])),
-    Dict(:ARGS=>(0.5/4, 0.1, 1.0, 32, 4), :KWARGS=>Dict([:n_episodes=>1000])),
-    Dict(:ARGS=>(0.5/2, 0.1, 1.0, 32, 2), :KWARGS=>Dict([:n_episodes=>1000])),
+    Dict(:ARGS=>(0.5/8, 0.1, 1.0, 32, 8),   :KWARGS=>Dict([:n_episodes=>1000])),
+    Dict(:ARGS=>(0.5/4, 0.1, 1.0, 32, 4),   :KWARGS=>Dict([:n_episodes=>1000])),
+    Dict(:ARGS=>(0.5/2, 0.1, 1.0, 32, 2),   :KWARGS=>Dict([:n_episodes=>1000])),
     Dict(:ARGS=>(0.5/16, 0.1, 1.0, 32, 16), :KWARGS=>Dict([:n_episodes=>1000]))
 ]
 
