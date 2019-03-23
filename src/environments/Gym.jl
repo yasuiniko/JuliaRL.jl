@@ -14,20 +14,23 @@ mutable struct GymEnv <: AbstractEnvironment
     seed::Int64
     function GymEnv(name::Symbol, version::Symbol; rng=nothing, seed=0)
         new_gym = new(OpenAIGym.GymEnv(name, version), 0.0, seed)
-        finalizer(close, new_gym)
-        println(new_gym.gymEnv.pyenv[:seed](PyObject(seed)))
+        println(new_gym.gymEnv.pyenv.seed(PyObject(seed)))
         # pycall(new_gym.gymEnv.pyenv[:seed], PyObject(seed))
         return new_gym
     end
 end
 
 function reset!(env::GymEnv; rng = nothing, kwargs...)
+    # if rng != nothing
+    #     println("RNG does nothing in Gym Reset!")
+    # end
     OpenAIGym.reset!(env.gymEnv)
     # pycall(env.gymEnv.pyenv[:seed], env.seed)
 end
 
 function Base.close(env::GymEnv)
-    !ispynull(env.gymEnv.pyenv) && env.gymEnv.pyenv[:close]()
+    # !ispynull(env.gymEnv.pyenv) && env.gymEnv.pyenv.close()
+    close(env.gymEnv)
 end
 
 get_actions(env::GymEnv) = OpenAIGym.actions(env.gymEnv, nothing)
@@ -57,10 +60,8 @@ function Base.show(io::IO, env::GymEnv)
     println(io, get_state(env))
 end
 
-
-
 render(env::GymEnv, args...; kwargs...) =
-    pycall(env.gymEnv.pyenv[:render], PyAny; kwargs...)
+    pycall(env.gymEnv.pyenv."render", PyAny; kwargs...)
 
 
 

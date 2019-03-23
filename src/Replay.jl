@@ -20,7 +20,6 @@ function sample(er::ExperienceReplay, batch_size; rng=Random.GLOBAL_RNG)
     return getrow(er.buffer, idx)
 end
 
-
 mutable struct WeightedExperienceReplay
     buffer::CircularBuffer
     sumtree::SumTree
