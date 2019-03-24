@@ -113,9 +113,9 @@ end
 
 Convert the environment to ascii and print to the given io.
 """
-function Base.show(io::IO, env::AbstractEnvironment)
-    println("Implement Base.show for environment $(typeof(``env))")
-end
+# function Base.show(io::IO, env::AbstractEnvironment)
+#     # println("Implement Base.show for environment $(typeof(env))")
+# end
 
 """
     render(env::AbstractEnvironment, args...; kwargs...)
