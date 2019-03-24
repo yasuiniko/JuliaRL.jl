@@ -10,15 +10,11 @@ function install_python()
         println("Error in Gym Module")
         println(ex)
         if isa(ex, PyCall.PyError)
-            if ex.T.__name__ == "ModuleNotFoundError"
-                println("Gym not installed. Installing now.")
-                # run(`$(joinpath(Conda.python_dir(Conda.ROOTENV),"python")) -c 'print("Hello")'`)
-                
-                # py"""import pip; pip install 'gym[all]';"""
-                copy!(pygym, pyimport("gym"))
-            else
-                throw(ex)
-            end
+            println("PyCall Error -- assuming module not found")
+            println("Gym not installed. Installing now.")
+            run(`$(joinpath(Conda.python_dir(Conda.ROOTENV),"python")) -c 'print("Hello")'`)
+            # py"""import pip; pip install 'gym[all]';"""
+            copy!(pygym, pyimport("gym"))
         else
             throw(ex)
         end
