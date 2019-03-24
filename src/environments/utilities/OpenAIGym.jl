@@ -206,7 +206,7 @@ function __init__()
             println("PyCall Error -- assuming module not found")
             println("Gym not installed. Installing now.")
             # run(`$(joinpath(Conda.python_dir(Conda.ROOTENV),"python")) -c 'print("Hello")'`)
-            run(`$(joinpath(Conda.python_dir(Conda.ROOTENV),"python")) -m pip install 'gym[all]'`)
+            run(`$(joinpath(Conda.python_dir(Conda.ROOTENV),"pip")) install 'gym[all]'`)
             # py"""import pip; pip install 'gym[all]';"""
             copy!(pygym, pyimport("gym"))
         else
