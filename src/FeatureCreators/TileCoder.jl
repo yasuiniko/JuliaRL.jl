@@ -28,3 +28,6 @@ function create_features(fc::TileCoder, s; ints=[], readonly=false)
         return TileCoding.tiles!(fc.iht, fc.num_tilings, s.*fc.num_tiles, ints, readonly)
     end
 end
+
+feature_size(fc::TileCoder) = fc.num_tilings
+

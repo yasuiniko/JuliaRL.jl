@@ -199,7 +199,7 @@ Action state value functions.
 
 """
 
-export QFunction, SparseQFunction, get_values, WatkinsQ, watkins_q_target
+export QFunction, SparseQFunction, get_values, WatkinsQ, watkins_q_target, feature_type
 
 abstract type AbstractQFunction end
 
@@ -212,6 +212,9 @@ mutable struct QFunction <: AbstractQFunction
         new(zeros(num_features), zeros(num_features), num_features_per_action, num_actions)
 end
 
+feature_type(q::QFunction) = Float64
+
+
 mutable struct SparseQFunction <: AbstractQFunction
     weights::Array{Float64}
     h::Array{Float64}
@@ -220,6 +223,8 @@ mutable struct SparseQFunction <: AbstractQFunction
     SparseQFunction(num_features::Integer, num_features_per_action::Integer, num_actions::Integer) =
         new(zeros(num_features), zeros(num_features), num_features_per_action, num_actions)
 end
+
+feature_type(q::SparseQFunction) = Int64
 
 # Get values for QFunction
 (value::QFunction)(ϕ, action) =
@@ -249,7 +254,7 @@ watkins_q_target(q::AbstractQFunction, ϕ, r) = r + maximum([q(ϕ, a) for a = 1:
 function update!(value::AbstractQFunction, opt::WatkinsQ, ϕ_t, ϕ_tp1, r, γ, ρ, terminal, a_t, a_tp1=nothing, target_policy=nothing)
     α = opt.α
     δ = watkins_q_target(value, ϕ_tp1, r) - value(ϕ_t, a_t)
-    Δθ = α*δ
+    Δθ = α.*δ
     # println(Δθ)
     update!(value, ϕ_t, a_t, Δθ)
 end
