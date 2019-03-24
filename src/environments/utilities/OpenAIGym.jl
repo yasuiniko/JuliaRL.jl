@@ -200,7 +200,7 @@ function __init__()
     try
         copy!(pygym, pyimport("gym"))
     catch ex
-        # println("Error in Gym Module")
+        println("Error in Gym Module")
         if isa(ex, PyCall.PyError)
             if ex.T.__name__ == "ModuleNotFoundError"
                 println("Gym not installed. Installing now.")
