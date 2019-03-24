@@ -21,15 +21,10 @@ mutable struct GymEnv <: AbstractEnvironment
 end
 
 function reset!(env::GymEnv; rng = nothing, kwargs...)
-    # if rng != nothing
-    #     println("RNG does nothing in Gym Reset!")
-    # end
     OpenAIGym.reset!(env.gymEnv)
-    # pycall(env.gymEnv.pyenv[:seed], env.seed)
 end
 
 function Base.close(env::GymEnv)
-    # !ispynull(env.gymEnv.pyenv) && env.gymEnv.pyenv.close()
     close(env.gymEnv)
 end
 

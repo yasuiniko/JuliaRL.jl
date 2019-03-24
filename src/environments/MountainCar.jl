@@ -10,6 +10,12 @@ const pos_limit = (-1.2, 0.5)
 const pos_initial_range = (-0.6, 0.4)
 end
 
+"""
+MountainCar(rng)
+
+# Arguments:
+`rng`: The random number generator.
+"""
 mutable struct MountainCar <: AbstractEnvironment
     pos::Float64
     vel::Float64
