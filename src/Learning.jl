@@ -4,6 +4,7 @@ module Learning
 
 
 abstract type Optimizer end
+abstract type LearningUpdate end
 
 """
     AbstractValueFunctionn
@@ -11,6 +12,11 @@ Abstract type definition for a value function
 """
 abstract type AbstractValueFunction end
 
+weights(q::AbstractValueFunction) = nothing
+update!(value::AbstractValueFunction, Δθ) = throw("Implement weight update for $(typeof(value))")
+update!(value::AbstractValueFunction, s, δ) = throw("Implement weight update for $(typeof(value))")
+
+feature_type(value::AbstractValueFunction) = Float64
 
 """
     AbstractVFunction
@@ -20,7 +26,7 @@ abstract type AbstractVFunction <: AbstractValueFunction end
 
 
 """
-update!(value::ValueFunction, opt::Optimizer, ρ, s_t, s_tp1, reward, γ, terminal)
+    update!(value::ValueFunction, opt::Optimizer, ρ, s_t, s_tp1, reward, γ, terminal)
 
 # Arguments:
 `value::ValueFunction`:
@@ -43,8 +49,10 @@ Abstract type definition for a state-action value function
 """
 abstract type AbstractQFunction <: AbstractValueFunction end
 
+update!(value::AbstractQFunction, s, a, δ) = throw("Implement weight update for $(typeof(value))")
+
 """
-update!(value::ValueFunction, opt::Optimizer, ρ, s_t, s_tp1, reward, γ, terminal)
+    update!(value::ValueFunction, opt::Optimizer, ρ, s_t, s_tp1, reward, γ, terminal)
 
 # Arguments:
 `value::ValueFunction`:
@@ -63,7 +71,6 @@ function update!(value::AbstractQFunction, lu::Optimizer, ϕ_t, ϕ_tp1, reward, 
     throw(ErrorException("Implement update for $(typeof(opt)) and $(typeof(value))"))
 end
 
-abstract type LearningUpdate end
 
 export LinearRL
 include("learning/LinearRL.jl")

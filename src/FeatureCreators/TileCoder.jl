@@ -23,9 +23,9 @@ end
 
 function create_features(fc::TileCoder, s; ints=[], readonly=false)
     if fc.wrap
-        return TileCoding.tileswrap!(fc.iht, fc.num_tilings, s.*fc.num_tiles, fc.wrapwidths, ints, readonly)
+        return 1 .+ TileCoding.tileswrap!(fc.iht, fc.num_tilings, s.*fc.num_tiles, fc.wrapwidths, ints, readonly)
     else
-        return TileCoding.tiles!(fc.iht, fc.num_tilings, s.*fc.num_tiles, ints, readonly)
+        return 1 .+ TileCoding.tiles!(fc.iht, fc.num_tilings, s.*fc.num_tiles, ints, readonly)
     end
 end
 
