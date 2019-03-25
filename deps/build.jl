@@ -1,5 +1,5 @@
-using Pkg
-# using PyCall
+# using Pkg
+using PyCall
 using Conda
 
 # run(`$(joinpath(Conda.python_dir(Conda.ROOTENV),"python")) -m pip install 'gym[all]'`)
@@ -13,9 +13,9 @@ using Conda
               # Conda.add("python=3.6");
               # Pkg.build("PyCall");'
 
-ENV["PYTHONHOME"] = "";
-Conda.add("pythong=3.6")
-Pkg.build("PyCall")
+# ENV["PYTHONHOME"] = "";
+# Conda.add("pythong=3.6")
+# Pkg.build("PyCall")
 
 
 function install_python()
