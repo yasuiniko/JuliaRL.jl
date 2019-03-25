@@ -1,14 +1,6 @@
 
+# JuliaRL.jl Documentation - WIP
 
+Current Working example: misc/test_linearqagent_mountaincar.jl
 
-
-
-# JuliaRL.jl Documentation
-
-## Environments
-
-
-
-
-
-
+More examples and explanations to come
