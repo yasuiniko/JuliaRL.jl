@@ -1,7 +1,22 @@
-using PyCall
+using Pkg
+# using PyCall
 using Conda
 
 # run(`$(joinpath(Conda.python_dir(Conda.ROOTENV),"python")) -m pip install 'gym[all]'`)
+# Pkg.activate(".");
+
+
+              # using Conda;
+              # Conda.add("numpy");
+              # Conda.add("scipy==0.17.1");
+              # ENV["PYTHONHOME"] = "";
+              # Conda.add("python=3.6");
+              # Pkg.build("PyCall");'
+
+ENV["PYTHONHOME"] = "";
+Conda.add("pythong=3.6")
+Pkg.build("PyCall")
+
 
 function install_python()
     try
