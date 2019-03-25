@@ -16,7 +16,7 @@ function get_action(agent::AbstractAgent, state)
     throw("Implement get Action for agent")
 end
 
-export LinearQAgent
+export LinearQAgent, TileCoderAgent
 include("agents/LinearQLearning.jl")
 # abstract type AbstractAgent end
 
