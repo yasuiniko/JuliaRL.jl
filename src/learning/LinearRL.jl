@@ -2,33 +2,15 @@ module LinearRL
 
 using LinearAlgebra
 
-export StateValueFunction, Optimizer, TD, WISTD, VtraceTD, TDC, GTD2, update!
+# Import important stuff from above.
+import ..AbstractValueFunction
+import ..AbstractVFunction
+import ..AbstractQFunction
+import ..LearningUpdate
+import ..Optimizer
+import ..update!
 
-abstract type AbstractValueFunction end
-abstract type Optimizer end
-
-"""
-update!(value::ValueFunction, opt::Optimizer, ρ, s_t, s_tp1, reward, γ, terminal)
-
-# Arguments:
-`value::ValueFunction`:
-`opt::Optimizer`:
-`ρ`: Importance sampling ratios (Array of Floats)
-`s_t`: States at time t
-`s_tp1`: States at time t + 1
-`reward`: cumulant or reward for value function
-`γ`: discount factor
-`terminal`: Determining termination of the episode (if applicable).
-"""
-function update!(value::AbstractValueFunction, opt::Optimizer, ϕ_t, ϕ_tp1, reward, γ, ρ, terminal)
-    throw(ErrorException("Implement update for $(typeof(opt))"))
-end
-
-function update!(value::AbstractValueFunction, opt::Optimizer, ϕ_t, ϕ_tp1, reward, γ, ρ, terminal, a_t, a_tp1, target_policy)
-    throw(ErrorException("Implement update for $(typeof(opt))"))
-end
-
-abstract type AbstractVFunction end
+export VFunction, TD, WISTD, VtraceTD, TDC, GTD2, update!
 
 mutable struct VFunction <: AbstractVFunction
     weights::Array{Float64}
@@ -45,16 +27,18 @@ end
 (value::VFunction)(ϕ) = dot(value.weights, ϕ)
 (value::SparseVFunction)(ϕ) = sum(value.weights[ϕ])
 
+update!(value::AbstractVFunction, Δθ) = throw("Implement update for value function")
 update!(value::AbstractVFunction, ϕ, δ) = throw("Implement update for value function")
+
 update!(value::VFunction, ϕ, δ) = value.weights .+= δ.*ϕ
 update!(value::SparseVFunction, ϕ, δ) = value.weights[ϕ] .+= δ
-
-update!(value::AbstractVFunction, Δθ) = value.weights .+= Δθ
 
 function update!(value::AbstractVFunction, opt::Optimizer, s_t, s_tp1, r, γ, ρ, terminal, a_t, a_tp1, target_policy)
     update!(value, opt, s_t, s_tp1, r, γ, ρ, terminal)
     # println("Hello World")
 end
+
+
 mutable struct OnlineTD <: Optimizer
     α::Float64
 end
@@ -194,14 +178,12 @@ function update!(value::VFunction, opt::BatchGTD2, s_t, s_tp1, r, γ, ρ, termin
 end
 
 
-"""
-Action state value functions.
-
-"""
-
+#------------------------------#
+#
+#Action state value functions.
+#
+#------------------------------#
 export QFunction, SparseQFunction, get_values, WatkinsQ, watkins_q_target, feature_type
-
-abstract type AbstractQFunction end
 
 mutable struct QFunction <: AbstractQFunction
     weights::Array{Float64}
@@ -239,17 +221,13 @@ get_values(value::AbstractQFunction, ϕ) = [value(ϕ, a) for a in 1:value.num_ac
 update!(value::AbstractQFunction, ϕ, action, δ) = throw("Define Update Function for Q Function")
 update!(value::QFunction, ϕ, action, δ) = value.weights[(value.num_features_per_action*(action-2) + 1):(value.num_features_per_action*(action-1) + 1)] .+= δ*ϕ
 function update!(value::SparseQFunction, ϕ, action, δ)
-    # println((value.num_features_per_action*(action-1) + 1))
     value.weights[ϕ .+ (value.num_features_per_action*(action-1) + 1)] .+= δ
-    # println(sum(value.weights))
-    # println(value.weights[ϕ .+ (value.num_features_per_action*(action-1) + 1)])
-    # println(value.weights)
 end
 
 mutable struct WatkinsQ <: Optimizer
     α::Float64
 end
-watkins_q_target(q::AbstractQFunction, ϕ, r) = r + maximum([q(ϕ, a) for a = 1:q.num_actions])
+watkins_q_target(q::AbstractQFunction, ϕ , r) = r + maximum([q(ϕ, a) for a = 1:q.num_actions])
 
 function update!(value::AbstractQFunction, opt::WatkinsQ, ϕ_t, ϕ_tp1, r, γ, ρ, terminal, a_t, a_tp1=nothing, target_policy=nothing)
     α = opt.α

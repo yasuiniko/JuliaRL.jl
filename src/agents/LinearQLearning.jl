@@ -1,7 +1,7 @@
 
 
 import ..FeatureCreators: AbstractFeatureCreator, create_features, feature_size
-import ..LinearRL: AbstractQFunction, update!, Optimizer, feature_type
+import ..Learning.LinearRL: AbstractQFunction, update!, Optimizer, feature_type
 import ..AbstractQPolicy
 import ..get
 

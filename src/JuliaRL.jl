@@ -5,9 +5,12 @@ greet() = print("Hello Reinforcement Learning Julia!")
 export FeatureCreators
 include("FeatureCreators.jl")
 
-export LinearRL, TabularRL
-include("LinearRL.jl")
-include("TabularRL.jl")
+export Learning
+include("Learning.jl")
+
+# export LinearRL, TabularRL
+# include("LinearRL.jl")
+# include("TabularRL.jl")
 
 export ExperienceReplay, WeightedExperienceReplay, size, getindex, add!
 include("Replay.jl")

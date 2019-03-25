@@ -27,7 +27,6 @@ JuliaRL.get_actions(env::AbstractEnvironment)
 To dig into the dynamics of the environment while running, we can also implement two interfaces for visualization.
 
 ```@docs
-JuliaRL.Base.show(io::IO, env::AbstractEnvironment)
 JuliaRL.render(env::AbstractEnvironment, args...; kwargs...)
 ```
 
