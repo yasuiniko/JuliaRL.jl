@@ -25,6 +25,11 @@ VFunction(num_features::Integer; init=zeros) = new(init(num_features))
 feature_type(v::VFunction) = typeof(v.weights[1])
 weights(v::VFunction) = v.weights
 
+(value::VFunction)(ϕ::Array{Number, 1}) = dot(value.weights, ϕ)
+
+update!(value::VFunction, Δθ) = value.weights .+= Δθ
+update!(value::VFunction, ϕ, δ) = value.weights .+= δ.*ϕ
+
 """
     SparseVFunction(num_features)
 A structure for when the feature vector is known to be sparse, and handed to the agent as a list of indices. Significantly faster than
@@ -39,19 +44,18 @@ SparseVFunction(num_features::Integer; init=zeros) = new(init(num_features))
 feature_type(v::SparseVFunction) = Integer
 weights(v::SparseVFunction) = v.weights
 
-(value::VFunction)(ϕ::Array{Number, 1}) = dot(value.weights, ϕ)
 (value::SparseVFunction)(ϕ::Array{Integer, 1}) = sum(value.weights[ϕ])
 
-update!(value::VFunction, Δθ) = value.weights .+= Δθ
 update!(value::SparseVFunction, Δθ) = value.weights .+= Δθ
-update!(value::VFunction, ϕ, δ) = value.weights .+= δ.*ϕ
-
 update!(value::SparseVFunction, ϕ, δ) = value.weights[ϕ] .+= δ
 
 update!(value::AbstractVFunction, opt::LearningUpdate, s_t, s_tp1, r, γ, ρ, terminal, a_t, a_tp1, target_policy) =
     update!(value, opt, s_t, s_tp1, r, γ, ρ, terminal)
 
-# Assumed to be online.
+"""
+    TD(α)
+Online Temporal Difference Learning.
+"""
 mutable struct TD <: LearningUpdate
     α::Float64
 end
@@ -63,6 +67,10 @@ function update!(value::AbstractVFunction, lu::TD, ϕ_t, ϕ_tp1, r, γ, ρ, term
     update!(value, ϕ_t, Δθ)
 end
 
+"""
+    TDLambda(α, λ)
+Online Temporal Difference Learning with eligibility traces.
+"""
 mutable struct TDLambda <: LearningUpdate
     α::Float64
     λ::Float64
@@ -96,6 +104,10 @@ export QFunction, SparseQFunction, get_values, WatkinsQ, watkins_q_target, featu
 
 get_values(value::AbstractQFunction, ϕ) = [value(ϕ, a) for a in 1:value.num_actions]
 
+"""
+    QFunction(num_features, num_features_per_action, num_actions)
+Linear QFunction. Assumes no sparsity, and an array of floats for a feature vector.
+"""
 mutable struct QFunction <: AbstractQFunction
     weights::Array{Float64}
     num_features_per_action::Integer
@@ -105,12 +117,16 @@ mutable struct QFunction <: AbstractQFunction
 end
 
 feature_type(q::QFunction) = Float64
-
-# Get values for QFunction
+weights(q::QFunction) = q.weights
 (value::QFunction)(ϕ, action) =
     dot(value.weights[(value.num_features_per_action*(action-2) + 1):(value.num_features_per_action*(action-1) + 1)], ϕ)
+update!(value::QFunction, ϕ, action, δ) = value.weights[(value.num_features_per_action*(action-2) + 1):(value.num_features_per_action*(action-1) + 1)] .+= δ*ϕ
 
 
+"""
+    SparseQFunction(num_features, num_features_per_action, num_actions)
+QFunction assuming sparsity.
+"""
 mutable struct SparseQFunction <: AbstractQFunction
     weights::Array{Float64}
     num_features_per_action::Integer
@@ -120,11 +136,17 @@ mutable struct SparseQFunction <: AbstractQFunction
 end
 
 feature_type(q::SparseQFunction) = Int64
-
-# Get values for Sparse Q Function
+weights(q::SparseQFunction) = q.weights
 (value::SparseQFunction)(ϕ, action) =
     sum(value.weights[ϕ .+ (value.num_features_per_action*(action-1) + 1)])
+function update!(value::SparseQFunction, ϕ, action, δ)
+    value.weights[ϕ .+ (value.num_features_per_action*(action-1))] .+= δ
+end
 
+"""
+    ActionSparseQFunction(num_features_per_action, num_actions)
+Same as SparseQFunction, with different implementation.
+"""
 mutable struct ActionSparseQFunction <: AbstractQFunction
     weights::Array{Float64}
     num_features_per_action::Integer
@@ -134,22 +156,17 @@ mutable struct ActionSparseQFunction <: AbstractQFunction
 end
 
 feature_type(q::ActionSparseQFunction) = Int64
-
-# Get values for Sparse Q Function
+weights(q::ActionSparseQFunction) = q.weights
 (value::ActionSparseQFunction)(ϕ, action::Integer) =
     sum(value.weights[action, ϕ])
-
-# update!(value::AbstractQFunction, ϕ, action, δ) = throw("Define Update Function for Q Function")
-update!(value::QFunction, ϕ, action, δ) = value.weights[(value.num_features_per_action*(action-2) + 1):(value.num_features_per_action*(action-1) + 1)] .+= δ*ϕ
-function update!(value::SparseQFunction, ϕ, action, δ)
-    value.weights[ϕ .+ (value.num_features_per_action*(action-1))] .+= δ
-end
-
 function update!(value::ActionSparseQFunction, ϕ, action, δ)
     value.weights[action, ϕ] .+= δ
 end
 
-
+"""
+    WatkinsQ(α)
+Q Learning as defined by Watkins
+"""
 mutable struct WatkinsQ <: LearningUpdate
     α::Float64
 end
@@ -158,7 +175,6 @@ watkins_q_target(q::AbstractQFunction, ϕ , r) = r + maximum([q(ϕ, a) for a = 1
 function update!(value::AbstractQFunction, opt::WatkinsQ, ϕ_t, ϕ_tp1, r, γ, ρ, terminal, a_t, a_tp1=nothing, target_policy=nothing)
     α = opt.α
     δ = watkins_q_target(value, ϕ_tp1, r) - value(ϕ_t, a_t)
-    # println(α)
     Δθ = α.*δ
     update!(value, ϕ_t, a_t, Δθ)
 end

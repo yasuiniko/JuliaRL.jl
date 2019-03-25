@@ -3,6 +3,7 @@
 include("utilities/TileCoding.jl")
 
 """
+    TileCoder(num_tilings, num_tiles, num_features, num_ints)
 Tile coder for coding all features together.
 """
 mutable struct TileCoder <: AbstractFeatureCreator

@@ -1,9 +1,15 @@
 
 module Learning
 
-
-
+"""
+    Optimizer
+WIP - Currently LearningUpdate and Optimizer are haphazardly similar....
+"""
 abstract type Optimizer end
+"""
+    LearningUpdate
+WIP - Currently LearningUpdate and Optimizer are haphazardly similar....
+"""
 abstract type LearningUpdate end
 
 """
@@ -78,8 +84,6 @@ include("learning/LinearRL.jl")
 
 # export TabularRL
 # include("learning/TabularRL.jl")
-
-
 # include("learning/FluxRL.jl")
 
 
