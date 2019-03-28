@@ -170,7 +170,7 @@ Q Learning as defined by Watkins
 mutable struct WatkinsQ <: LearningUpdate
     α::Float64
 end
-watkins_q_target(q::AbstractQFunction, ϕ , r) = r + maximum([q(ϕ, a) for a = 1:q.num_actions])
+watkins_q_target(q::AbstractQFunction, ϕ, r) = r + maximum(get_values(q, ϕ))
 
 function update!(value::AbstractQFunction, opt::WatkinsQ, ϕ_t, ϕ_tp1, r, γ, ρ, terminal, a_t, a_tp1=nothing, target_policy=nothing)
     α = opt.α

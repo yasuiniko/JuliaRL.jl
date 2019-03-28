@@ -5,12 +5,12 @@ import Base.getindex, Base.size, Base.eltype
 export SumTree, add!, getindex, sample
 
 mutable struct SumTree{T}
-    capacity
-    tree_struct
+    capacity::Int64
+    tree_struct::Array{Float64, 1}
     data::Array{T, 1}
-    write_pos
-    size
-    tree_len
+    write_pos::Int64
+    size::Int64
+    tree_len::Int64
     SumTree{T}(capacity) where T = new{T}(
         capacity,
         zeros(2*capacity - 1),

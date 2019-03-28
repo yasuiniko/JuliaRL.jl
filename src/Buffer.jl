@@ -1,17 +1,21 @@
 # module Buffer
 
+# This is really similar to the CircularBuffer implementation, but has _some_ nice things that aren't available.
+# Ideally we might want to reimplement _data_frame with a DataStructures Circular Buffer to make this implementation simpler.
+
+# Although, it might be better to keep this delinked as the data_frame implementation allows for inline memory of the arrays.
+
 using DataFrames
 import Base.size, Base.getindex
 
 export CircularBuffer, add!, size, capacity, getindex
-# abstract Buffer
 
 mutable struct CircularBuffer
     _data_frame::DataFrame
-    _current_col
-    _capacity
-    _full
-    _data_types
+    _current_col::Int64
+    _capacity::Int64
+    _full::bool
+    _data_types::Array
     function CircularBuffer(size, types; column_names=nothing)
         if column_names != nothing
             data_frame = DataFrame(types, column_names, size)

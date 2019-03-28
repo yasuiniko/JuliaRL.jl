@@ -44,7 +44,7 @@ abstract type AbstractVFunction <: AbstractValueFunction end
 `γ`: discount factor
 `terminal`: Determining termination of the episode (if applicable).
 """
-function update!(value::AbstractVFunction, lu::Optimizer, ϕ_t, ϕ_tp1, reward, γ, ρ, terminal)
+function update!(value::AbstractVFunction, lu::LearningUpdate, ϕ_t, ϕ_tp1, reward, γ, ρ, terminal)
     throw(ErrorException("Implement update for $(typeof(opt)) and $(typeof(value))"))
 end
 
@@ -73,17 +73,20 @@ update!(value::AbstractQFunction, s, a, δ) = throw("Implement weight update for
 `a_tp1`: Action at time t + 1
 `target_policy`: Action at time t
 """
-function update!(value::AbstractQFunction, lu::Optimizer, ϕ_t, ϕ_tp1, reward, γ, ρ, terminal, a_t, a_tp1, target_policy)
+function update!(value::AbstractQFunction, lu::LearningUpdate, ϕ_t, ϕ_tp1, reward, γ, ρ, terminal, a_t, a_tp1, target_policy)
     throw(ErrorException("Implement update for $(typeof(opt)) and $(typeof(value))"))
 end
 
+include("learning/Updates.jl")
 
 export LinearRL
 include("learning/LinearRL.jl")
 
+export TabularRL
+include("learning/TabularRL.jl")
 
-# export TabularRL
-# include("learning/TabularRL.jl")
+
+
 # include("learning/FluxRL.jl")
 
 
