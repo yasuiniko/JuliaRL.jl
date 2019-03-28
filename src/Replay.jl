@@ -1,9 +1,9 @@
 
-include("Buffer.jl")
 include("SumTree.jl")
 
 import Random
 import Base.getindex, Base.size
+import DataStructures: CircularBuffer
 
 mutable struct ExperienceReplay
     buffer::CircularBuffer
