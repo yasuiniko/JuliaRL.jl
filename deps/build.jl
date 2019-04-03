@@ -19,6 +19,7 @@ using Conda
 
 
 function install_python()
+    pygym = PyNULL()
     try
         copy!(pygym, pyimport("gym"))
     catch ex
