@@ -20,15 +20,7 @@ jobs:
       script:
         - julia -e 'using Pkg;
               Pkg.activate(".");
-              Pkg.build();
-              Pkg.add("Conda");
-              using Conda;
-              Conda.add("numpy");
-              Conda.add("scipy==0.17.1");
-              ENV["PYTHONHOME"] = "";
-              Conda.add("python=3.6");
-              Pkg.build("PyCall");'
-        - ~/.julia/conda/3/bin/pip install 'gym[atari]'
+              Pkg.instantiate();'
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
                                                Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
@@ -36,18 +28,4 @@ jobs:
 
 
 script:
- # - julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
-  - julia -e 'using Pkg;
-              Pkg.activate(".");
-              Pkg.build();
-              Pkg.add("Conda");
-              using Conda;
-              Conda.add("numpy");
-              Conda.add("scipy==0.17.1");
-              ENV["PYTHONHOME"] = "";
-              Conda.add("python=3.6");
-              Pkg.build("PyCall");'
-  - ~/.julia/conda/3/bin/pip install 'gym[atari]'
-  - julia --color=yes -e 'using Pkg;
-                          Pkg.activate(".");
-                          Pkg.test();'
+  - julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
