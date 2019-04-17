@@ -1,5 +1,5 @@
 # using Pkg
-using PyCall
+# using PyCall
 using Conda
 
 # run(`$(joinpath(Conda.python_dir(Conda.ROOTENV),"python")) -m pip install 'gym[all]'`)
@@ -39,4 +39,4 @@ function install_python()
     end
 end
 
-install_python()
+# install_python()
