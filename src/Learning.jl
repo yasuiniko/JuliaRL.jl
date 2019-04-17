@@ -77,6 +77,16 @@ function update!(value::AbstractQFunction, lu::LearningUpdate, ϕ_t, ϕ_tp1, rew
     throw(ErrorException("Implement update for $(typeof(opt)) and $(typeof(value))"))
 end
 
+
+"""
+    AbstractModel
+Abstract type definition for a model
+"""
+abstract type AbstractModel end
+
+
+
+
 # include("learning/Updates.jl")
 
 export LinearRL
@@ -93,9 +103,3 @@ include("learning/TabularRL.jl")
 
 
 end
-
-
-
-
-
-

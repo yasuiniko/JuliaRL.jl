@@ -6,6 +6,7 @@ using LinearAlgebra
 import ..AbstractValueFunction
 import ..AbstractVFunction
 import ..AbstractQFunction
+import ..AbstractModel
 import ..LearningUpdate
 import ..Optimizer
 import ..update!
@@ -178,6 +179,63 @@ function update!(value::AbstractQFunction, opt::WatkinsQ, ϕ_t, ϕ_tp1, r, γ, �
     Δθ = α.*δ
     update!(value, ϕ_t, a_t, Δθ)
 end
+
+
+"""
+    TransitionModel
+Linear feature model as used in Sutton, Szepesvari,
+ Geramifard, Bowling 2008
+"""
+mutable struct TransitionModel <: AbstractModel
+    F::Array{Float64, 2}
+end
+
+"""
+    TransitionModelUpdate
+Feature-to-feature transition model update as used in Sutton, Szepesvari,
+ Geramifard, Bowling 2008
+"""
+mutable struct TransitionModelUpdate <: LearningUpdate
+    α::Float64
+end
+
+function update!(model::TransitionModel, x_t, x_tp1)
+    α = model.α
+    model.F .+= α * (x_tp1 - F * x_t) * transpose(x_t)
+end
+
+"""
+    RewardModel
+Linear reward model as used in Sutton, Szepesvari,
+ Geramifard, Bowling 2008
+"""
+mutable struct RewardModel <: AbstractModel
+    b::Array{Float64}
+end
+
+"""
+    RewardModelUpdate
+Linear reward model update as used in Sutton, Szepesvari,
+ Geramifard, Bowling 2008
+"""
+mutable struct TransitionModelUpdate <: LearningUpdate
+    α::Float64
+end
+
+function update!(model::RewardModel, r, x)
+    α = model.α
+    model.b .+= α * (r - sum(x.*b)) * x
+end
+
+
+# mutable struct LinearDynaQUpdate
+#     α::Float64
+#     F::Array{TransitionModel}
+#     b::Array{RewardModel}
+#     q::WatkinsQ
+# end
+# function update!()
+
 
 
 end
