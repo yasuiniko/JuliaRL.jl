@@ -41,7 +41,7 @@ end
 """
    step!(env::AbstractEnvironment, action; rng::AbstractRNG, kwargs...)
 
-Update the state of the passed environment `env` based on the underlying dynamics and the action. 
+Update the state of the passed environment `env` based on the underlying dynamics and the action.
 """
 function step!(env::AbstractEnvironment, action; rng::AbstractRNG=Random.GLOBAL_RNG, kwargs...) # -> env, state, reward, terminal
     environment_step!(env, action; rng=rng, kwargs...)
@@ -128,7 +128,6 @@ end
 
 
 include("environments/MountainCar.jl")
-include("environments/Gym.jl")
 
 
 # end
