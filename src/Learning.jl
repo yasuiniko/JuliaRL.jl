@@ -84,6 +84,12 @@ Abstract type definition for a model
 """
 abstract type AbstractModel end
 
+"""
+    AbstractSearchControl
+Abstract type definition for a search control
+"""
+abstract type AbstractSearchControl end
+
 
 
 

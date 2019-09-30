@@ -29,7 +29,7 @@ mutable struct MountainCar <: AbstractEnvironment
     end
 end
 
-MountainCar(normalized::Bool=false) = MountainCar(0.0, 0.0, normalized)
+MountainCar(normalized::Bool=false) = MountainCar(-0.5, 0.0, normalized)
 MountainCar(rng::AbstractRNG, normalized::Bool=false) =
     MountainCar((rand(rng)*(MountainCarConst.pos_initial_range[2]
                             - MountainCarConst.pos_initial_range[1])
@@ -37,28 +37,37 @@ MountainCar(rng::AbstractRNG, normalized::Bool=false) =
                 0.0,
                 normalized)
 
+function bounds(env::MountainCar)
+    return hcat([[x...] for x in [MountainCarConst.pos_limit,
+                                  MountainCarConst.vel_limit]]...)
+end
 
-function reset!(env::MountainCar; rng = Random.GLOBAL_RNG, kwargs...)
+function reset!(env::MountainCar; rng=nothing, kwargs...)
     # throw("Implement reset! for environment $(typeof(env))")
-    env.pos = (rand(rng)*(MountainCarConst.pos_initial_range[2]
-                          - MountainCarConst.pos_initial_range[1])
-               + MountainCarConst.pos_initial_range[1])
-    env.vel = 0
+    if isnothing(rng)
+        env.pos = -0.5
+        env.vel = 0.0
+    else
+        env.pos = (rand(rng)*(MountainCarConst.pos_initial_range[2]
+                              - MountainCarConst.pos_initial_range[1])
+                   + MountainCarConst.pos_initial_range[1])
+        env.vel = 0.0
+    end
 end
 
 get_actions(env::MountainCar) = env.actions
 valid_action(env::MountainCar, action) = action in env.actions
 
 function environment_step!(env::MountainCar, action; rng=Random.GLOBAL_RNG, kwargs...)
+    # taken from Singh & Sutton 1996
+    # Reinforcement learning with replacing eligibility traces
     @boundscheck valid_action(env, action)
-    env.vel = clamp(env.vel + (action - 2)*0.001 - 0.0025*cos(3*env.pos), MountainCarConst.vel_limit...)
-    env.pos = clamp(env.pos + env.vel, MountainCarConst.pos_limit...)
+    next_vel = clamp(env.vel + (action - 2)*0.001 - 0.0025*cos(3*env.pos), MountainCarConst.vel_limit...)
+    env.pos = max(env.pos + env.vel, MountainCarConst.pos_limit[1])
+    env.vel = env.pos == MountainCarConst.pos_limit[1] ? 0 : next_vel
 end
 
 function get_reward(env::MountainCar) # -> determines if the agent_state is terminal
-    if env.pos >= MountainCarConst.pos_limit[2]
-        return 0
-    end
     return -1
 end
 
@@ -79,5 +88,3 @@ function get_normalized_state(env::MountainCar)
     vel_limit = MountainCarConst.vel_limit
     return [(env.pos - pos_limit[1])/(pos_limit[2] - pos_limit[1]), (env.vel - vel_limit[1])/(vel_limit[2] - vel_limit[1])]
 end
-
-

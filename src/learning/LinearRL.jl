@@ -1,32 +1,35 @@
 module LinearRL
 
 using LinearAlgebra
+using DataStructures
 
 # Import important stuff from above.
 import ..AbstractValueFunction
 import ..AbstractVFunction
 import ..AbstractQFunction
 import ..AbstractModel
+import ..AbstractSearchControl
 import ..LearningUpdate
 import ..Optimizer
 import ..update!
 
-export VFunction, TD, WISTD, VtraceTD, TDC, GTD2, update!
+export VFunction, AbstractVFunction, TD, WISTD, VtraceTD, TDC, GTD2, update!, update_priority!
 
 """
     VFunction(num_features)
 A structure hosting the weights for a linear value function. Used for Linear function approximation.
 """
-mutable struct VFunction{W} <: AbstractVFunction
+mutable struct VFunction{W<:Vector{<:Number}} <: AbstractVFunction
     weights::W
 end
 
-VFunction(num_features::Integer; init=zeros) = new(init(num_features))
+VFunction(num_features::Integer; init=zeros) = VFunction(init(num_features))
 
 feature_type(v::VFunction) = typeof(v.weights[1])
 weights(v::VFunction) = v.weights
 
-(value::VFunction)(ϕ::Array{Number, 1}) = dot(value.weights, ϕ)
+(value::VFunction)(ϕ) = dot(value.weights, ϕ)
+# (value::VFunction)(ϕ::SubArray{N, 1, Matrix{N}, Tuple{Base.Slice{Base.OneTo{Int64}}, Int64}, true}) where{N<:Number} = dot(value.weights, ϕ)
 
 update!(value::VFunction, Δθ) = value.weights .+= Δθ
 update!(value::VFunction, ϕ, δ) = value.weights .+= δ.*ϕ
@@ -40,12 +43,12 @@ mutable struct SparseVFunction{W} <: AbstractVFunction
     weights::W
 end
 
-SparseVFunction(num_features::Integer; init=zeros) = new(init(num_features))
+SparseVFunction(num_features::Integer; init=zeros) = SparseVFunction(init(num_features))
 
 feature_type(v::SparseVFunction) = Integer
 weights(v::SparseVFunction) = v.weights
 
-(value::SparseVFunction)(ϕ::Array{Integer, 1}) = sum(value.weights[ϕ])
+(value::SparseVFunction)(ϕ::Vector{Integer}) = sum(value.weights[ϕ])
 
 update!(value::SparseVFunction, Δθ) = value.weights .+= Δθ
 update!(value::SparseVFunction, ϕ, δ) = value.weights[ϕ] .+= δ
@@ -61,11 +64,12 @@ mutable struct TD <: LearningUpdate
     α::Float64
 end
 
-function update!(value::AbstractVFunction, lu::TD, ϕ_t, ϕ_tp1, r, γ, ρ, terminal)
+function update!(value::AbstractVFunction, lu::TD, ϕ_t::Vector{N}, ϕ_tp1::Vector{N}, r::Number, γ::Number, ρ::Number, terminal::Bool) where{N<:Number}
     α = lu.α
-    δ = r + γ*values(ϕ_t) - value(ϕ_t)
+    δ = r + γ*value(ϕ_t) - value(ϕ_t)
     Δθ = (α*ρ*δ)
     update!(value, ϕ_t, Δθ)
+    return δ
 end
 
 """
@@ -187,21 +191,27 @@ Linear feature model as used in Sutton, Szepesvari,
  Geramifard, Bowling 2008
 """
 mutable struct TransitionModel <: AbstractModel
-    F::Array{Float64, 2}
-end
-
-"""
-    TransitionModelUpdate
-Feature-to-feature transition model update as used in Sutton, Szepesvari,
- Geramifard, Bowling 2008
-"""
-mutable struct TransitionModelUpdate
+    w::Matrix{Float64}
     α::Float64
+    z::Vector{Float64}
+    TransitionModel(w::Matrix{Float64}, α::Float64) = new(w, α, zeros(size(w)[1]))
 end
-function update!(model::TransitionModel, x_t, x_tp1)
-    α = model.α
-    model.F .+= α * (x_tp1 - F * x_t) * transpose(x_t)
+(F::TransitionModel)(x::Vector{<:Number}) = sum(F.w[:, x], dims=2)
+(F::Vector{TransitionModel})(x::Vector{<:Number}, a::Int) = sum(F[a].w[:, x], dims=2)
+function update!(F::TransitionModel, x_t::Vector{N}, x_tp1::Vector{N}) where{N <: Number}
+    z = -sum(view(F.w, :, x_t), dims=2)
+    z[x_tp1] .+= 1
+    # BLAS.ger!(F.α, x_tp1 .- sum(F.w[:, x_t], dims=2), x_t, F.w)  # outer product for full
+    F.w[:, x_t] .+= F.α * z
 end
+# mutable struct TransitionModel <: AbstractModel
+#     w::Array{Float64, 3}
+#     α::Float64
+# end
+# function update!(F::TransitionModel, x_t::Vector{N}, x_tp1::Vector{N}, a::Int) where{N <: Number}
+#     # for x as a list of indices
+#     F.w[a, :, :] .+= F.α * (x_tp1 .- sum(F.w[a, :, x_t], dims=2)) * transpose(x_t)  # outer product
+# end
 
 """
     RewardModel
@@ -209,21 +219,49 @@ Linear reward model as used in Sutton, Szepesvari,
  Geramifard, Bowling 2008
 """
 mutable struct RewardModel <: AbstractModel
-    b::Array{Float64}
-end
-
-"""
-    RewardModelUpdate
-Linear reward model update as used in Sutton, Szepesvari,
- Geramifard, Bowling 2008
-"""
-mutable struct RewardModelUpdate
+    w::Vector{Float64}
     α::Float64
 end
-function update!(model::RewardModel, r, x)
-    α = model.α
-    model.b .+= α * (r - sum(x.*b)) * x
+(b::RewardModel)(x::Vector{<:Number}) = sum(b.w[x])
+(b::Vector{RewardModel})(x::Vector{<:Number}, a::Int) = sum(b[a].w[x])
+function update!(b::RewardModel, r::Number, x::Vector{<:Number})
+    # b.w .+= b.α * (r - dot(x, b.w)) * x  # full x
+    # BLAS.axpy!(b.α, (r - dot(x, b.w)) .* x, b.w)  # full x
+    b.w[x] .+= b.α * (r - sum(b.w[x]))  # sparse x
+end
+# mutable struct RewardModel <: AbstractModel
+#     w::Matrix{Float64}
+#     α::Float64
+# end
+# function update!(b::RewardModel, r::Number, x::Vector{<:Number}, a::Number)
+#     b.w[a, x] .+= b.α * (r - sum(b.w[a, x]))
+# end
+
+
+"""
+    Prioritized Sweeping, McMahan and Gordon 2005
+"""
+mutable struct PrioritizedSweeping <: AbstractSearchControl
+    queue::PriorityQueue{Integer,Float64,Base.Order.ReverseOrdering{Base.Order.ForwardOrdering}}
+    PrioritizedSweeping() = new(PriorityQueue{Integer, Float64}(Base.Order.Reverse))
 end
 
+function update!(pq::PrioritizedSweeping, δ::Number, x::Vector{<:Number})
+    @inbounds for i in 1:length(x)
+        if x[i] != 0
+            update_priority!(pq.queue, i, abs(x[i] * δ))
+        end
+    end
+end
+
+function update_priority!(pq::PriorityQueue, key, priority)
+    if key in keys(pq)
+        if pq[key] > priority
+            pq[key] = priority
+        end
+    else
+        pq[key] = priority
+    end
+end
 
 end

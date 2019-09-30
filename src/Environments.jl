@@ -22,7 +22,7 @@ end
 
 Function to start the passed environment `env`.
 """
-function start!(env::AbstractEnvironment; rng::AbstractRNG=Random.GLOBAL_RNG, kwargs...)
+function start!(env::AbstractEnvironment; rng::Union{Some{AbstractRNG}, Nothing}=Random.GLOBAL_RNG, kwargs...)
     reset!(env; rng=rng, kwargs...)
     return env, get_state(env)
 end

@@ -23,7 +23,8 @@ export
     get_state,
     is_terminal,
     get_actions,
-    render
+    render,
+    bounds
 
 include("Environments.jl")
 

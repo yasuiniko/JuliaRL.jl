@@ -13,7 +13,7 @@ abstract type AbstractFeatureCreator end
 Actually create the features
 """
 function create_features(fc::AbstractFeatureCreator, s; kwargs...)
-    throw("Implement create features for $(typof(fc))")
+    throw("Implement create features for $(typeof(fc))")
 end
 
 """
@@ -21,11 +21,11 @@ end
 Get size of feature vector the features assume exists.
 """
 function feature_size(fc::AbstractFeatureCreator)
-    throw("Implement feature size for $(typof(fc))")
+    throw("Implement feature size for $(typeof(fc))")
 end
 
 
-export TileCoder
+export TileCoder, TileCoderFull
 include("FeatureCreators/TileCoder.jl")
 
 export KenervaCoder

@@ -16,8 +16,9 @@ function get_action(agent::AbstractAgent, state)
     throw("Implement get Action for agent")
 end
 
-export LinearQAgent, TileCoderAgent
+export LinearQAgent, TileCoderAgent, LinearDynaAgent, TileCoderDynaAgent
 include("agents/LinearQLearning.jl")
+include("agents/LinearDyna.jl")
 # abstract type AbstractAgent end
 
 # function get_probability(agent::AbstractAgent, state, action)
@@ -25,7 +26,3 @@ include("agents/LinearQLearning.jl")
 # end
 
 end
-
-
-
-

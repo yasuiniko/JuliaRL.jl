@@ -4,7 +4,7 @@ module TileCoding
 mutable struct IHT
     size::Integer
     overfullCount::Int64
-    dictionary::Dict{Array{Int64, 1}, Int64}
+    dictionary::Dict{Vector{Int64}, Int64}
     IHT(sizeval) = new(sizeval, 0, Dict{Array{Int64, 1}, Int64}())
 end
 
@@ -12,7 +12,7 @@ capacity(iht::IHT) = iht.size
 count(iht::IHT) = length(iht.dictionary)
 fullp(iht::IHT) = length(iht.dictionary) >= count(iht)
 
-function getindex!(iht::IHT, obj::Array{Int64, 1}, readonly=false)
+function getindex!(iht::IHT, obj::Vector{Int64}, readonly=false)
     d = iht.dictionary
     if obj in keys(d)
         return d[obj]::Int64
@@ -41,7 +41,7 @@ function tiles!(ihtORsize, numtilings, floats, ints=[], readonly=false)
     tiles = zeros(Int64, numtilings)
     for tiling = 1:numtilings
         tilingX2 = tiling*2
-        coords = [tiling]::Array{Int64, 1}
+        coords = [tiling]::Vector{Int64}
         b = tiling
         for (q_idx, q) in enumerate(qfloats)
             append!(coords, floor((q + b) / numtilings))
